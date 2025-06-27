@@ -39,6 +39,10 @@ export class ForestScene extends Phaser.Scene {
     this.pauseCallback = callback;
   }
 
+  setTool(tool) {
+    this.currentTool = tool;
+  }
+
   create() {
     // Create tile map
     this.createTileMap();

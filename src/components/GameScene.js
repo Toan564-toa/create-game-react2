@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import { ForestScene } from '../game/ForestScene';
 import './GameScene.css';
 
-const GameScene = ({ gameData, updateGameData, onPause, isPaused = false }) => {
+const GameScene = ({ gameData, updateGameData, onPause, isPaused = false, onToolChange }) => {
   const gameRef = useRef(null);
   const gameInstanceRef = useRef(null);
 
@@ -58,13 +58,30 @@ const GameScene = ({ gameData, updateGameData, onPause, isPaused = false }) => {
         scene.setPauseCallback(onPause);
         
         if (isPaused) {
-          scene.pause();
+          scene.scene.pause();
         } else {
-          scene.resume();
+          scene.scene.resume();
         }
       }
     }
   }, [gameData, updateGameData, onPause, isPaused]);
+
+  // Hàm public để đổi tool từ bên ngoài
+  const setTool = (tool) => {
+    if (gameInstanceRef.current) {
+      const scene = gameInstanceRef.current.scene.getScene('ForestScene');
+      if (scene && scene.setTool) {
+        scene.setTool(tool);
+      }
+    }
+  };
+
+  // Đăng ký callback đổi tool nếu có
+  React.useEffect(() => {
+    if (onToolChange) {
+      onToolChange(setTool);
+    }
+  }, [onToolChange]);
 
   return (
     <div className="game-scene">

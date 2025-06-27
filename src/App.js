@@ -14,6 +14,8 @@ function App() {
     co2Target: 1000,
     areaHealth: 100
   });
+  const [tool, setTool] = useState('plant');
+  const gameToolSetter = React.useRef(null);
 
   const startGame = () => {
     setGameState('playing');
@@ -35,6 +37,14 @@ function App() {
     setGameData(prev => ({ ...prev, ...newData }));
   };
 
+  // Khi đổi tool từ HUD, cập nhật state và gọi setTool trên GameScene
+  const handleToolChange = (newTool) => {
+    setTool(newTool);
+    if (gameToolSetter.current) {
+      gameToolSetter.current(newTool);
+    }
+  };
+
   return (
     <div className="App">
       {gameState === 'menu' && (
@@ -47,10 +57,13 @@ function App() {
             gameData={gameData}
             updateGameData={updateGameData}
             onPause={pauseGame}
+            onToolChange={fn => { gameToolSetter.current = fn; }}
           />
           <HUD 
             gameData={gameData}
             onPause={pauseGame}
+            tool={tool}
+            onToolChange={handleToolChange}
           />
         </div>
       )}
@@ -62,10 +75,13 @@ function App() {
             updateGameData={updateGameData}
             onPause={pauseGame}
             isPaused={true}
+            onToolChange={fn => { gameToolSetter.current = fn; }}
           />
           <HUD 
             gameData={gameData}
             onPause={pauseGame}
+            tool={tool}
+            onToolChange={handleToolChange}
           />
           <div className="pause-overlay">
             <div className="pause-menu">

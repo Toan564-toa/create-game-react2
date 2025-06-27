@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './HUD.css';
 
-const HUD = ({ gameData, onPause }) => {
+const HUD = ({ gameData, onPause, tool, onToolChange }) => {
   const [environmentData, setEnvironmentData] = useState({
     temperature: 22,
     humidity: 65,
@@ -59,21 +59,17 @@ const HUD = ({ gameData, onPause }) => {
       {/* Bottom HUD - Tools */}
       <div className="hud-bottom">
         <div className="tool-panel">
-          <div className="tool-item active">
+          <div className={`tool-item${tool === 'plant' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('plant')}>
             <div className="tool-icon">🌱</div>
             <div className="tool-label">Plant (1)</div>
           </div>
-          <div className="tool-item">
+          <div className={`tool-item${tool === 'water' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('water')}>
             <div className="tool-icon">💧</div>
             <div className="tool-label">Water (2)</div>
           </div>
-          <div className="tool-item">
+          <div className={`tool-item${tool === 'fertilize' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('fertilize')}>
             <div className="tool-icon">🌿</div>
             <div className="tool-label">Fertilize (3)</div>
-          </div>
-          <div className="tool-item">
-            <div className="tool-icon">⚔️</div>
-            <div className="tool-label">Attack</div>
           </div>
         </div>
         
