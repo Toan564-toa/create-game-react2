@@ -15,7 +15,14 @@ export class ForestScene extends Phaser.Scene {
     this.plants = [];
     this.tiles = [];
     this.cursors = null;
-    this.gameData = null;
+    this.gameData = {
+      carbonCredits: 0,
+      energyOrbs: 100,
+      currentArea: 'Forest Valley',
+      co2Absorbed: 0,
+      co2Target: 1000,
+      areaHealth: 100
+    };
     this.updateCallback = null;
     this.pauseCallback = null;
     this.currentTool = 'plant';
@@ -180,6 +187,8 @@ export class ForestScene extends Phaser.Scene {
   }
 
   gameTick() {
+    if (!this.gameData) return;
+    
     // Update environment
     this.environment.update();
     
