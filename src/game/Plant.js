@@ -1,8 +1,9 @@
 export class Plant {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, type) {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.type = type;
     
     // Plant properties
     this.maxGrowthTime = 60; // seconds
@@ -22,6 +23,10 @@ export class Plant {
     
     // Growth animation
     this.growthTween = null;
+
+    this.age = 0; // số ngày tuổi
+    this.stage = 'seedling'; // 'seedling', 'mature', 'dead'
+    this.status = 'normal'; // 'normal', 'broken', 'burned'
   }
 
   grow(environment) {
@@ -50,6 +55,11 @@ export class Plant {
     
     // Calculate carbon absorbed
     const carbonAbsorbed = this.carbonRate * growthIncrement;
+    
+    this.age += 1;
+    if (this.age > 5 && this.stage === 'seedling') {
+      this.stage = 'mature';
+    }
     
     return carbonAbsorbed;
   }
@@ -101,6 +111,10 @@ export class Plant {
     this.scene.time.delayedCall(500, () => {
       this.sprite.setFillStyle(originalColor);
     });
+
+    if (this.status === 'burned') {
+      this.status = 'normal';
+    }
   }
 
   fertilize() {
@@ -172,4 +186,22 @@ export class Plant {
       this.fertilized = false;
     }
   }
-} 
+
+  applyDisaster(disasterType) {
+    if (this.stage === 'dead') return;
+    if (disasterType === 'storm') {
+      this.status = 'broken';
+    } else if (disasterType === 'heatwave') {
+      this.status = 'burned';
+    }
+  }
+
+  chopDown() {
+    if (this.status === 'broken') {
+      this.stage = 'dead';
+      this.status = 'normal';
+    }
+  }
+}
+
+export default Plant; 

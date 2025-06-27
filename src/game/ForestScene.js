@@ -3,6 +3,8 @@ import { TileGenerator } from './TileGenerator';
 import { Plant } from './Plant';
 import { Environment } from './Environment';
 import { GameState } from './GameState';
+import TimeManager from './TimeManager';
+import RandomEventManager from './RandomEvent';
 
 export class ForestScene extends Phaser.Scene {
   constructor() {
@@ -25,6 +27,9 @@ export class ForestScene extends Phaser.Scene {
     this.currentTool = 'plant';
     this.tickTime = 0;
     this.tickInterval = 1000; // 1 second per tick
+    this.lastDay = TimeManager.getCurrentDay();
+    this.lastEvent = null;
+    this.tickCount = 0;
   }
 
   setGameData(data) {
@@ -182,7 +187,16 @@ export class ForestScene extends Phaser.Scene {
 
   gameTick() {
     if (!this.gameData) return;
-    
+
+    // Chỉ chuyển ngày khi tick đủ 1 ngày (ví dụ mỗi 10 tick = 1 ngày)
+    if (!this.tickCount) this.tickCount = 0;
+    this.tickCount++;
+    if (this.tickCount >= 10) {
+      this.tickCount = 0;
+      TimeManager.nextDay();
+      this.handleNewDay();
+    }
+
     // Update environment
     this.environment.update();
     
@@ -217,6 +231,37 @@ export class ForestScene extends Phaser.Scene {
     this.updateGameData({
       areaHealth: healthPercentage
     });
+  }
+
+  handleNewDay() {
+    const currentDay = TimeManager.getCurrentDay();
+    // Cập nhật tuổi và trạng thái cây
+    this.plants.forEach(plant => {
+      plant.grow(this.environment);
+    });
+    // Sinh thiên tai ngẫu nhiên
+    const event = RandomEventManager.getRandomEvent(currentDay);
+    this.lastEvent = event;
+    if (event) {
+      // Áp dụng thiên tai lên cây ngẫu nhiên
+      const affectedPlants = this.plants.filter(p => p.stage !== 'dead' && p.status === 'normal');
+      if (affectedPlants.length > 0) {
+        // 20% số cây bị ảnh hưởng
+        const numAffected = Math.max(1, Math.floor(affectedPlants.length * 0.2));
+        for (let i = 0; i < numAffected; i++) {
+          const idx = Math.floor(Math.random() * affectedPlants.length);
+          affectedPlants[idx].applyDisaster(event);
+          affectedPlants.splice(idx, 1);
+        }
+      }
+    }
+    // Gửi thông báo ngày mới và sự kiện lên HUD
+    window.dispatchEvent(new CustomEvent('dayEvent', {
+      detail: {
+        day: currentDay,
+        event: event
+      }
+    }));
   }
 
   sendEnvironmentData() {

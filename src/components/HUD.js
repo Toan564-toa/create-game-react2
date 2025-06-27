@@ -8,6 +8,8 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
     pH: 6.5,
     airQuality: 'Good'
   });
+  const [currentDay, setCurrentDay] = useState(1);
+  const [disasterEvent, setDisasterEvent] = useState(null);
 
   const healthPercentage = (gameData.areaHealth / 100) * 100;
   
@@ -18,19 +20,36 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
         setEnvironmentData(event.detail.environment);
       }
     };
-
     window.addEventListener('environmentUpdate', handleEnvironmentUpdate);
     return () => {
       window.removeEventListener('environmentUpdate', handleEnvironmentUpdate);
     };
   }, []);
-  
+
+  // Listen for day and disaster event
+  useEffect(() => {
+    const handleDayEvent = (event) => {
+      if (event.detail) {
+        setCurrentDay(event.detail.day);
+        setDisasterEvent(event.detail.event);
+      }
+    };
+    window.addEventListener('dayEvent', handleDayEvent);
+    return () => {
+      window.removeEventListener('dayEvent', handleDayEvent);
+    };
+  }, []);
+
   return (
     <div className="hud">
       {/* Top HUD */}
       <div className="hud-top">
         <div className="hud-section">
-          <div className="hud-label">🌍 Area Health</div>
+          <div className="hud-label">🗓️ Day</div>
+          <div className="hud-value">{currentDay}</div>
+        </div>
+        <div className="hud-section">
+          <div className="hud-label">🌳 Area Health</div>
           <div className="health-bar">
             <div 
               className="health-fill" 
@@ -54,6 +73,16 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
           <div className="hud-label">🌲 Carbon Credits</div>
           <div className="hud-value">{gameData.carbonCredits}</div>
         </div>
+        {/* Thông báo thiên tai */}
+        {disasterEvent && (
+          <div className="hud-section disaster-event">
+            <div className="hud-label">⚠️ Disaster!</div>
+            <div className="hud-value">
+              {disasterEvent === 'storm' && 'A storm has broken some trees!'}
+              {disasterEvent === 'heatwave' && 'A heatwave has burned some trees!'}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Bottom HUD - Tools */}
