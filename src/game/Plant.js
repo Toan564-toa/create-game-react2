@@ -96,9 +96,10 @@ export class Plant {
     this.health = Math.min(100, this.health + 20);
     
     // Visual feedback
-    this.sprite.setTint(0x4169E1);
+    const originalColor = this.sprite.fillColor;
+    this.sprite.setFillStyle(0x4169E1);
     this.scene.time.delayedCall(500, () => {
-      this.sprite.clearTint();
+      this.sprite.setFillStyle(originalColor);
     });
   }
 
@@ -107,9 +108,10 @@ export class Plant {
     this.health = Math.min(100, this.health + 30);
     
     // Visual feedback
-    this.sprite.setTint(0xFFD700);
+    const originalColor = this.sprite.fillColor;
+    this.sprite.setFillStyle(0xFFD700);
     this.scene.time.delayedCall(500, () => {
-      this.sprite.clearTint();
+      this.sprite.setFillStyle(originalColor);
     });
   }
 
@@ -117,7 +119,7 @@ export class Plant {
     this.harvested = true;
     
     // Visual feedback
-    this.sprite.setTint(0xFFD700);
+    this.sprite.setFillStyle(0xFFD700);
     this.scene.time.delayedCall(1000, () => {
       this.sprite.destroy();
     });
