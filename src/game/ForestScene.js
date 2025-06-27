@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import { TileGenerator } from './TileGenerator';
-import { Player } from './Player';
 import { Plant } from './Plant';
 import { Environment } from './Environment';
 import { GameState } from './GameState';
@@ -11,10 +10,8 @@ export class ForestScene extends Phaser.Scene {
     this.gameState = new GameState();
     this.environment = new Environment();
     this.tileGenerator = new TileGenerator();
-    this.player = null;
     this.plants = [];
     this.tiles = [];
-    this.cursors = null;
     this.gameData = {
       carbonCredits: 0,
       energyOrbs: 100,
@@ -46,15 +43,11 @@ export class ForestScene extends Phaser.Scene {
     // Create tile map
     this.createTileMap();
     
-    // Create player
-    this.player = new Player(this, 496, 496); // Center of 62x62 grid
-    
     // Setup input
     this.setupInput();
     
-    // Setup camera
+    // Setup camera (no follow)
     this.cameras.main.setBounds(0, 0, 992, 992);
-    this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
     
     // Start game loop
     this.startGameLoop();
@@ -87,9 +80,6 @@ export class ForestScene extends Phaser.Scene {
   }
 
   setupInput() {
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.wasd = this.input.keyboard.addKeys('W,S,A,D');
-    
     // Mouse input for planting and interaction
     this.input.on('pointerdown', (pointer) => {
       this.handleMouseClick(pointer);
@@ -239,11 +229,6 @@ export class ForestScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    // Handle player movement
-    if (this.player) {
-      this.player.update(this.cursors, this.wasd);
-    }
-    
     // Update plants
     this.plants.forEach(plant => {
       plant.update(delta);
