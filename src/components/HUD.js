@@ -42,14 +42,15 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
 
   return (
     <div className="hud">
-      {/* Top HUD */}
-      <div className="hud-top">
+      <div className='d-flex justify-between items-start'>
+        {/* Top HUD */}
+      <div className="">
         <div className="hud-section">
-          <div className="hud-label">🗓️ Day</div>
+          <div className="hud-label">🗓️ Ngày</div>
           <div className="hud-value">{currentDay}</div>
         </div>
         <div className="hud-section">
-          <div className="hud-label">🌳 Area Health</div>
+          <div className="hud-label">🌳 Sức khỏe khu vực</div>
           <div className="health-bar">
             <div 
               className="health-fill" 
@@ -60,29 +61,52 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
         </div>
         
         <div className="hud-section">
-          <div className="hud-label">🌱 CO₂ Absorbed</div>
+          <div className="hud-label">🌱 CO₂ Hấp thụ</div>
           <div className="hud-value">{Math.round(gameData.co2Absorbed)} / {gameData.co2Target}</div>
         </div>
         
         <div className="hud-section">
-          <div className="hud-label">💎 Energy Orbs</div>
+          <div className="hud-label">💎 Năng lượng</div>
           <div className="hud-value">{gameData.energyOrbs}</div>
         </div>
         
         <div className="hud-section">
-          <div className="hud-label">🌲 Carbon Credits</div>
+          <div className="hud-label">🌲 Tín dụng Carbon</div>
           <div className="hud-value">{gameData.carbonCredits}</div>
         </div>
         {/* Thông báo thiên tai */}
         {disasterEvent && (
-          <div className="hud-section disaster-event">
-            <div className="hud-label">⚠️ Disaster!</div>
+          <div className="hud-section2 disaster-event">
+            <div className="hud-label">⚠️ Thảm họa!</div>
             <div className="hud-value">
-              {disasterEvent === 'storm' && 'A storm has broken some trees!'}
-              {disasterEvent === 'heatwave' && 'A heatwave has burned some trees!'}
+              {disasterEvent === 'storm' && 'Một cơn bão đã phá hủy một số cây!'}
+              {disasterEvent === 'heatwave' && 'Một đợt nắng nóng đã đốt cháy một số cây!'}
             </div>
           </div>
         )}
+      </div>
+      {/* Environment Panel */}
+      <div className="hud-section">
+        <div className="env-title">Environment</div>
+        <div className="env-stats">
+          <div className="env-stat">
+            <span className="env-label">🌡️ Nhiệt độ:</span>
+            <span className="env-value">{environmentData.temperature.toFixed(1)}°C</span>
+          </div>
+          <div className="env-stat">
+            <span className="env-label">💧 Độ ẩm:</span>
+            <span className="env-value">{environmentData.humidity.toFixed(0)}%</span>
+          </div>
+          <div className="env-stat">
+            <span className="env-label">🧪 Độ pH:</span>
+            <span className="env-value">{environmentData.pH.toFixed(1)}</span>
+          </div>
+          <div className="env-stat">
+            <span className="env-label">☁️ Chất lượng không khí:</span>
+            <span className="env-value">{environmentData.airQuality}</span>
+          </div>
+        </div>
+      </div>
       </div>
       
       {/* Bottom HUD - Tools */}
@@ -90,47 +114,26 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
         <div className="tool-panel">
           <div className={`tool-item${tool === 'plant' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('plant')}>
             <div className="tool-icon">🌱</div>
-            <div className="tool-label">Plant (1)</div>
+            <div className="tool-label">Cây (1)</div>
           </div>
           <div className={`tool-item${tool === 'water' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('water')}>
             <div className="tool-icon">💧</div>
-            <div className="tool-label">Water (2)</div>
+            <div className="tool-label">Nước (2)</div>
           </div>
           <div className={`tool-item${tool === 'fertilize' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('fertilize')}>
             <div className="tool-icon">🌿</div>
-            <div className="tool-label">Fertilize (3)</div>
+            <div className="tool-label">Phân bón (3)</div>
           </div>
         </div>
         
         <div className="action-buttons">
           <button className="action-btn" onClick={onPause}>
-            ⏸️ Pause (ESC)
+            ⏸️ Tạm dừng (ESC)
           </button>
         </div>
       </div>
       
-      {/* Environment Panel */}
-      <div className="environment-panel">
-        <div className="env-title">Environment</div>
-        <div className="env-stats">
-          <div className="env-stat">
-            <span className="env-label">🌡️ Temp:</span>
-            <span className="env-value">{environmentData.temperature.toFixed(1)}°C</span>
-          </div>
-          <div className="env-stat">
-            <span className="env-label">💧 Humidity:</span>
-            <span className="env-value">{environmentData.humidity.toFixed(0)}%</span>
-          </div>
-          <div className="env-stat">
-            <span className="env-label">🧪 pH:</span>
-            <span className="env-value">{environmentData.pH.toFixed(1)}</span>
-          </div>
-          <div className="env-stat">
-            <span className="env-label">☁️ Air Quality:</span>
-            <span className="env-value">{environmentData.airQuality}</span>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 };

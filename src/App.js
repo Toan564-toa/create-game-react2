@@ -85,9 +85,9 @@ function App() {
           />
           <div className="pause-overlay">
             <div className="pause-menu">
-              <h2>Game Paused</h2>
-              <button onClick={resumeGame}>Resume</button>
-              <button onClick={returnToMenu}>Main Menu</button>
+              <h2>Tạm dừng</h2>
+              <button onClick={resumeGame}>Tiếp tục</button>
+              <button onClick={returnToMenu}>Quay về menu</button>
             </div>
           </div>
         </div>

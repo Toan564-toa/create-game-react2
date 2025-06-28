@@ -6,36 +6,36 @@ const MainMenu = ({ onStartGame }) => {
     <div className="main-menu">
       <div className="menu-content">
         <h1 className="game-title">🌲 Forest Guardian 🌲</h1>
-        <p className="game-subtitle">Protect the environment, one tree at a time</p>
+        <p className="game-subtitle">Bảo vệ môi trường, từng cây một</p>
         
         <div className="menu-buttons">
           <button className="menu-button primary" onClick={onStartGame}>
-            🎮 Start Game
+            🎮 Bắt đầu
           </button>
           <button className="menu-button">
-            📊 Statistics
+            📊 Thống kê
           </button>
           <button className="menu-button">
-            ⚙️ Settings
+            ⚙️ Cài đặt
           </button>
           <button className="menu-button">
-            ❓ Help
+            ❓ Hướng dẫn
           </button>
         </div>
         
         <div className="game-info">
-          <h3>How to Play:</h3>
+          <h3>Cách chơi:</h3>
           <ul>
-            <li>🌱 Plant trees to absorb CO₂</li>
-            <li>💧 Water and fertilize your plants</li>
-            <li>⚔️ Fight pollution beasts</li>
-            <li>🌍 Restore the ecosystem</li>
+            <li>🌱 Trồng cây để hấp thụ CO₂</li>
+            <li>💧 Tưới và bón phân cho cây</li>
+            <li>⚔️ Đánh các con vật ô nhiễm</li>
+            <li>🌍 Phục hồi hệ sinh thái</li>
           </ul>
         </div>
         
         <div className="controls-info">
-          <h3>Controls:</h3>
-          <p>WASD - Move | Mouse - Plant/Interact | ESC - Pause</p>
+          <h3>Điều khiển:</h3>
+          <p>WASD - Di chuyển | Chuột - Trồng/Tương tác | ESC - Tạm dừng</p>
         </div>
       </div>
     </div>

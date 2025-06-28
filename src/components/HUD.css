@@ -169,3 +169,27 @@
   color: #7dd87d;
   font-weight: bold;
 } 
+
+.d-flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.hud-section2 {
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #7dd87d;
+  border-radius: 8px;
+  padding: 10px 15px;
+  text-align: center;
+  color: white;
+  font-family: 'Courier New', monospace;
+  min-width: 120px;
+  width: 150px;
+}
