@@ -30,6 +30,13 @@ export class ForestScene extends Phaser.Scene {
     this.lastDay = TimeManager.getCurrentDay();
     this.lastEvent = null;
     this.tickCount = 0;
+    
+    // Camera pan variables
+    this.isPanning = false;
+    this.panStartX = 0;
+    this.panStartY = 0;
+    this.cameraStartX = 0;
+    this.cameraStartY = 0;
   }
 
   setGameData(data) {
@@ -55,8 +62,8 @@ export class ForestScene extends Phaser.Scene {
     // Setup input
     this.setupInput();
     
-    // Setup camera (no follow)
-    this.cameras.main.setBounds(0, 0, 992, 992);
+    // Setup camera with pan controls
+    this.setupCamera();
     
     // Start game loop
     this.startGameLoop();
@@ -88,10 +95,142 @@ export class ForestScene extends Phaser.Scene {
     }
   }
 
-  setupInput() {
-    // Mouse input for planting and interaction
+  setupCamera() {
+    // Set camera bounds to cover the entire map
+    const mapWidth = 62 * 16; // 992px
+    const mapHeight = 62 * 16; // 992px
+    this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+    
+    // Center camera initially
+    this.cameras.main.centerOn(mapWidth / 2, mapHeight / 2);
+    
+    // Enable camera pan with smooth movement
+    this.cameras.main.setZoom(1);
+    this.cameras.main.setBackgroundColor('#2c5530');
+    
+    // Add camera controls
+    this.setupCameraControls();
+  }
+
+  setupCameraControls() {
+    // Mouse wheel zoom with smooth transition
+    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+      const zoom = this.cameras.main.zoom;
+      const newZoom = Phaser.Math.Clamp(zoom - deltaY * 0.001, 0.5, 2);
+      
+      // Smooth zoom transition
+      this.tweens.add({
+        targets: this.cameras.main,
+        zoom: newZoom,
+        duration: 200,
+        ease: 'Power2'
+      });
+    });
+
+    // Middle mouse button or space + drag for panning
     this.input.on('pointerdown', (pointer) => {
-      this.handleMouseClick(pointer);
+      if (pointer.button === 1 || (pointer.button === 0 && this.input.keyboard.addKey('SPACE').isDown)) {
+        this.isPanning = true;
+        this.panStartX = pointer.x;
+        this.panStartY = pointer.y;
+        this.cameraStartX = this.cameras.main.scrollX;
+        this.cameraStartY = this.cameras.main.scrollY;
+        this.input.setDefaultCursor('grabbing');
+        
+        // Show pan indicator
+        const panIndicator = document.getElementById('panIndicator');
+        if (panIndicator) {
+          panIndicator.classList.add('active');
+        }
+      }
+    });
+
+    this.input.on('pointermove', (pointer) => {
+      if (this.isPanning) {
+        const deltaX = this.panStartX - pointer.x;
+        const deltaY = this.panStartY - pointer.y;
+        
+        const newScrollX = this.cameraStartX + deltaX;
+        const newScrollY = this.cameraStartY + deltaY;
+        
+        // Apply bounds checking
+        const bounds = this.cameras.main.getBounds();
+        const viewportWidth = this.cameras.main.width / this.cameras.main.zoom;
+        const viewportHeight = this.cameras.main.height / this.cameras.main.zoom;
+        
+        const clampedX = Phaser.Math.Clamp(newScrollX, bounds.x, bounds.x + bounds.width - viewportWidth);
+        const clampedY = Phaser.Math.Clamp(newScrollY, bounds.y, bounds.y + bounds.height - viewportHeight);
+        
+        this.cameras.main.setScroll(clampedX, clampedY);
+      }
+    });
+
+    this.input.on('pointerup', (pointer) => {
+      if (this.isPanning) {
+        this.isPanning = false;
+        this.input.setDefaultCursor('default');
+        
+        // Hide pan indicator
+        const panIndicator = document.getElementById('panIndicator');
+        if (panIndicator) {
+          panIndicator.classList.remove('active');
+        }
+      }
+    });
+
+    // Keyboard camera controls with smooth movement
+    this.input.keyboard.on('keydown-ARROWLEFT', () => {
+      const newScrollX = this.cameras.main.scrollX - 50;
+      this.cameras.main.scrollX = Math.max(0, newScrollX);
+    });
+    
+    this.input.keyboard.on('keydown-ARROWRIGHT', () => {
+      const newScrollX = this.cameras.main.scrollX + 50;
+      const maxScrollX = 992 - (this.cameras.main.width / this.cameras.main.zoom);
+      this.cameras.main.scrollX = Math.min(maxScrollX, newScrollX);
+    });
+    
+    this.input.keyboard.on('keydown-ARROWUP', () => {
+      const newScrollY = this.cameras.main.scrollY - 50;
+      this.cameras.main.scrollY = Math.max(0, newScrollY);
+    });
+    
+    this.input.keyboard.on('keydown-ARROWDOWN', () => {
+      const newScrollY = this.cameras.main.scrollY + 50;
+      const maxScrollY = 992 - (this.cameras.main.height / this.cameras.main.zoom);
+      this.cameras.main.scrollY = Math.min(maxScrollY, newScrollY);
+    });
+
+    // Reset camera position with smooth transition
+    this.input.keyboard.on('keydown-HOME', () => {
+      this.tweens.add({
+        targets: this.cameras.main,
+        scrollX: 496 - (this.cameras.main.width / this.cameras.main.zoom) / 2,
+        scrollY: 496 - (this.cameras.main.height / this.cameras.main.zoom) / 2,
+        zoom: 1,
+        duration: 500,
+        ease: 'Power2'
+      });
+    });
+
+    // Space key indicator
+    this.input.keyboard.on('keydown-SPACE', () => {
+      this.input.setDefaultCursor('grab');
+    });
+
+    this.input.keyboard.on('keyup-SPACE', () => {
+      if (!this.isPanning) {
+        this.input.setDefaultCursor('default');
+      }
+    });
+  }
+
+  setupInput() {
+    // Mouse input for planting and interaction (only when not panning)
+    this.input.on('pointerdown', (pointer) => {
+      if (pointer.button === 0 && !this.input.keyboard.addKey('SPACE').isDown) {
+        this.handleMouseClick(pointer);
+      }
     });
     
     // Keyboard shortcuts
