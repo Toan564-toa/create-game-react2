@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css'; // Đảm bảo file này sẽ chứa Tailwind directives
 import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
