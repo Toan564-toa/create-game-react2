@@ -99,10 +99,12 @@ export class ForestScene extends Phaser.Scene {
     // Set camera bounds to cover the entire map
     const mapWidth = 62 * 16; // 992px
     const mapHeight = 62 * 16; // 992px
+    this.mapWidth = mapWidth; // Lưu lại để dùng khi resize/zoom
+    this.mapHeight = mapHeight;
     this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
     
     // Center camera initially
-    this.cameras.main.centerOn(mapWidth / 2, mapHeight / 2);
+    this.centerCamera();
     
     // Enable camera pan with smooth movement
     this.cameras.main.setZoom(1);
@@ -110,6 +112,19 @@ export class ForestScene extends Phaser.Scene {
     
     // Add camera controls
     this.setupCameraControls();
+
+    // Lắng nghe sự kiện resize để căn giữa lại camera
+    this.scale.on('resize', () => {
+      this.centerCamera();
+    });
+  }
+
+  centerCamera() {
+    // Căn giữa camera dựa trên kích thước viewport và zoom hiện tại
+    const cam = this.cameras.main;
+    const centerX = this.mapWidth / 2;
+    const centerY = this.mapHeight / 2;
+    cam.centerOn(centerX, centerY);
   }
 
   setupCameraControls() {
@@ -123,7 +138,10 @@ export class ForestScene extends Phaser.Scene {
         targets: this.cameras.main,
         zoom: newZoom,
         duration: 200,
-        ease: 'Power2'
+        ease: 'Power2',
+        onUpdate: () => {
+          this.centerCamera(); // Căn giữa lại khi zoom
+        }
       });
     });
 

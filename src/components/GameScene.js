@@ -88,7 +88,7 @@ const GameScene = ({ gameData, updateGameData, onPause, isPaused = false, onTool
       <div ref={gameRef} className="phaser-container" />
       
       {/* Camera Controls Indicator */}
-      <div className="camera-controls">
+      {/* <div className="camera-controls">
         <h4>🎮 Camera Controls</h4>
         <ul>
           <li>🖱️ Middle click + drag: Pan</li>
@@ -97,7 +97,7 @@ const GameScene = ({ gameData, updateGameData, onPause, isPaused = false, onTool
           <li>⬅️➡️⬆️⬇️ Arrow keys: Move</li>
           <li>🏠 Home: Reset view</li>
         </ul>
-      </div>
+      </div> */}
       
       {/* Pan Indicator */}
       <div className="pan-indicator" id="panIndicator">
