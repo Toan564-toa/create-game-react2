@@ -30,13 +30,6 @@ export class ForestScene extends Phaser.Scene {
     this.lastDay = TimeManager.getCurrentDay();
     this.lastEvent = null;
     this.tickCount = 0;
-    
-    // Camera pan variables
-    this.isPanning = false;
-    this.panStartX = 0;
-    this.panStartY = 0;
-    this.cameraStartX = 0;
-    this.cameraStartY = 0;
   }
 
   setGameData(data) {
@@ -56,31 +49,28 @@ export class ForestScene extends Phaser.Scene {
   }
 
   create() {
-    // Create tile map
+    // Tính toán tileSize để map vừa với chiều cao màn hình
+    const mapTiles = 62;
+    const screenHeight = this.sys.game.config.height;
+    const tileSize = Math.floor(screenHeight / mapTiles);
+    this.tileSize = tileSize;
     this.createTileMap();
-    
-    // Setup input
     this.setupInput();
-    
-    // Setup camera with pan controls
-    this.setupCamera();
-    
-    // Start game loop
     this.startGameLoop();
-    
-    // Send initial environment data
     this.sendEnvironmentData();
   }
 
   createTileMap() {
-    // Generate 62x62 tile grid
-    for (let x = 0; x < 62; x++) {
+    // Generate 62x62 tile grid với tileSize động
+    const mapTiles = 62;
+    const tileSize = this.tileSize || 16;
+    for (let x = 0; x < mapTiles; x++) {
       this.tiles[x] = [];
-      for (let y = 0; y < 62; y++) {
-        const tileX = x * 16;
-        const tileY = y * 16;
+      for (let y = 0; y < mapTiles; y++) {
+        const tileX = x * tileSize;
+        const tileY = y * tileSize;
         const tileType = this.tileGenerator.getTileType(x, y);
-        const tile = this.add.rectangle(tileX + 8, tileY + 8, 16, 16, tileType.color);
+        const tile = this.add.rectangle(tileX + tileSize/2, tileY + tileSize/2, tileSize, tileSize, tileType.color);
         tile.setStrokeStyle(1, 0x000000, 0.3);
         tile.tileData = {
           x: x,
@@ -93,152 +83,15 @@ export class ForestScene extends Phaser.Scene {
         this.tiles[x][y] = tile;
       }
     }
-  }
-
-  setupCamera() {
-    // Set camera bounds to cover the entire map
-    const mapWidth = 62 * 16; // 992px
-    const mapHeight = 62 * 16; // 992px
-    this.mapWidth = mapWidth; // Lưu lại để dùng khi resize/zoom
-    this.mapHeight = mapHeight;
-    this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
-    
-    // Center camera initially
-    this.centerCamera();
-    
-    // Enable camera pan with smooth movement
-    this.cameras.main.setZoom(1);
-    this.cameras.main.setBackgroundColor('#2c5530');
-    
-    // Add camera controls
-    this.setupCameraControls();
-
-    // Lắng nghe sự kiện resize để căn giữa lại camera
-    this.scale.on('resize', () => {
-      this.centerCamera();
-    });
-  }
-
-  centerCamera() {
-    // Căn giữa camera dựa trên kích thước viewport và zoom hiện tại
-    const cam = this.cameras.main;
-    const centerX = this.mapWidth / 2;
-    const centerY = this.mapHeight / 2;
-    cam.centerOn(centerX, centerY);
-  }
-
-  setupCameraControls() {
-    // Mouse wheel zoom with smooth transition
-    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
-      const zoom = this.cameras.main.zoom;
-      const newZoom = Phaser.Math.Clamp(zoom - deltaY * 0.001, 0.5, 2);
-      
-      // Smooth zoom transition
-      this.tweens.add({
-        targets: this.cameras.main,
-        zoom: newZoom,
-        duration: 200,
-        ease: 'Power2',
-        onUpdate: () => {
-          this.centerCamera(); // Căn giữa lại khi zoom
-        }
-      });
-    });
-
-    // Middle mouse button or space + drag for panning
-    this.input.on('pointerdown', (pointer) => {
-      if (pointer.button === 1 || (pointer.button === 0 && this.input.keyboard.addKey('SPACE').isDown)) {
-        this.isPanning = true;
-        this.panStartX = pointer.x;
-        this.panStartY = pointer.y;
-        this.cameraStartX = this.cameras.main.scrollX;
-        this.cameraStartY = this.cameras.main.scrollY;
-        this.input.setDefaultCursor('grabbing');
-        
-        // Show pan indicator
-        const panIndicator = document.getElementById('panIndicator');
-        if (panIndicator) {
-          panIndicator.classList.add('active');
-        }
-      }
-    });
-
-    this.input.on('pointermove', (pointer) => {
-      if (this.isPanning) {
-        const deltaX = this.panStartX - pointer.x;
-        const deltaY = this.panStartY - pointer.y;
-        
-        const newScrollX = this.cameraStartX + deltaX;
-        const newScrollY = this.cameraStartY + deltaY;
-        
-        // Apply bounds checking
-        const bounds = this.cameras.main.getBounds();
-        const viewportWidth = this.cameras.main.width / this.cameras.main.zoom;
-        const viewportHeight = this.cameras.main.height / this.cameras.main.zoom;
-        
-        const clampedX = Phaser.Math.Clamp(newScrollX, bounds.x, bounds.x + bounds.width - viewportWidth);
-        const clampedY = Phaser.Math.Clamp(newScrollY, bounds.y, bounds.y + bounds.height - viewportHeight);
-        
-        this.cameras.main.setScroll(clampedX, clampedY);
-      }
-    });
-
-    this.input.on('pointerup', (pointer) => {
-      if (this.isPanning) {
-        this.isPanning = false;
-        this.input.setDefaultCursor('default');
-        
-        // Hide pan indicator
-        const panIndicator = document.getElementById('panIndicator');
-        if (panIndicator) {
-          panIndicator.classList.remove('active');
-        }
-      }
-    });
-
-    // Keyboard camera controls with smooth movement
-    this.input.keyboard.on('keydown-ARROWLEFT', () => {
-      const newScrollX = this.cameras.main.scrollX - 50;
-      this.cameras.main.scrollX = Math.max(0, newScrollX);
-    });
-    
-    this.input.keyboard.on('keydown-ARROWRIGHT', () => {
-      const newScrollX = this.cameras.main.scrollX + 50;
-      const maxScrollX = 992 - (this.cameras.main.width / this.cameras.main.zoom);
-      this.cameras.main.scrollX = Math.min(maxScrollX, newScrollX);
-    });
-    
-    this.input.keyboard.on('keydown-ARROWUP', () => {
-      const newScrollY = this.cameras.main.scrollY - 50;
-      this.cameras.main.scrollY = Math.max(0, newScrollY);
-    });
-    
-    this.input.keyboard.on('keydown-ARROWDOWN', () => {
-      const newScrollY = this.cameras.main.scrollY + 50;
-      const maxScrollY = 992 - (this.cameras.main.height / this.cameras.main.zoom);
-      this.cameras.main.scrollY = Math.min(maxScrollY, newScrollY);
-    });
-
-    // Reset camera position with smooth transition
-    this.input.keyboard.on('keydown-HOME', () => {
-      this.tweens.add({
-        targets: this.cameras.main,
-        scrollX: 496 - (this.cameras.main.width / this.cameras.main.zoom) / 2,
-        scrollY: 496 - (this.cameras.main.height / this.cameras.main.zoom) / 2,
-        zoom: 1,
-        duration: 500,
-        ease: 'Power2'
-      });
-    });
-
-    // Space key indicator
-    this.input.keyboard.on('keydown-SPACE', () => {
-      this.input.setDefaultCursor('grab');
-    });
-
-    this.input.keyboard.on('keyup-SPACE', () => {
-      if (!this.isPanning) {
-        this.input.setDefaultCursor('default');
+    // Căn giữa map trên màn hình
+    const mapWidth = mapTiles * tileSize;
+    const mapHeight = mapTiles * tileSize;
+    const offsetX = (this.sys.game.config.width - mapWidth) / 2;
+    const offsetY = (this.sys.game.config.height - mapHeight) / 2;
+    this.children.list.forEach(obj => {
+      if (obj instanceof Phaser.GameObjects.Rectangle) {
+        obj.x += offsetX;
+        obj.y += offsetY;
       }
     });
   }
@@ -270,13 +123,20 @@ export class ForestScene extends Phaser.Scene {
   }
 
   handleMouseClick(pointer) {
-    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    const tileX = Math.floor(worldPoint.x / 16);
-    const tileY = Math.floor(worldPoint.y / 16);
-    
-    if (tileX >= 0 && tileX < 62 && tileY >= 0 && tileY < 62) {
+    // Lấy vị trí chuột theo tileSize động
+    const rect = this.sys.game.canvas.getBoundingClientRect();
+    const mouseX = pointer.x - rect.left;
+    const mouseY = pointer.y - rect.top;
+    const tileSize = this.tileSize || 16;
+    const mapTiles = 62;
+    const mapWidth = mapTiles * tileSize;
+    const mapHeight = mapTiles * tileSize;
+    const offsetX = (this.sys.game.config.width - mapWidth) / 2;
+    const offsetY = (this.sys.game.config.height - mapHeight) / 2;
+    const tileX = Math.floor((mouseX - offsetX) / tileSize);
+    const tileY = Math.floor((mouseY - offsetY) / tileSize);
+    if (tileX >= 0 && tileX < mapTiles && tileY >= 0 && tileY < mapTiles) {
       const tile = this.tiles[tileX][tileY];
-      
       switch (this.currentTool) {
         case 'plant':
           this.plantSeed(tileX, tileY);

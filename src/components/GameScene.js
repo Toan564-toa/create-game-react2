@@ -86,23 +86,6 @@ const GameScene = ({ gameData, updateGameData, onPause, isPaused = false, onTool
   return (
     <div className="game-scene">
       <div ref={gameRef} className="phaser-container" />
-      
-      {/* Camera Controls Indicator */}
-      {/* <div className="camera-controls">
-        <h4>🎮 Camera Controls</h4>
-        <ul>
-          <li>🖱️ Middle click + drag: Pan</li>
-          <li>⌨️ Space + left click: Pan</li>
-          <li>🖱️ Mouse wheel: Zoom</li>
-          <li>⬅️➡️⬆️⬇️ Arrow keys: Move</li>
-          <li>🏠 Home: Reset view</li>
-        </ul>
-      </div> */}
-      
-      {/* Pan Indicator */}
-      <div className="pan-indicator" id="panIndicator">
-        🖱️ Panning mode active
-      </div>
     </div>
   );
 };
