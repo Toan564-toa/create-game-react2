@@ -71,7 +71,6 @@ export class ForestScene extends Phaser.Scene {
         const tileY = y * tileSize;
         const tileType = this.tileGenerator.getTileType(x, y);
         const tile = this.add.rectangle(tileX + tileSize/2, tileY + tileSize/2, tileSize, tileSize, tileType.color);
-        tile.setStrokeStyle(1, 0x000000, 0.3);
         tile.tileData = {
           x: x,
           y: y,
