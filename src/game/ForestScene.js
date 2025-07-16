@@ -94,6 +94,14 @@ export class ForestScene extends Phaser.Scene {
           fertilized: false
         };
         this.tiles[x][y] = tile;
+        // Nếu là Forest (hasTree) thì tạo cây trưởng thành (Trees)
+        if (tileType.type === 'dirt' && tileType.hasTree) {
+          const plant = new Plant(this, tileX + tileSize/2, tileY + tileSize/2, 'trees');
+          plant.stage = 'mature';
+          plant.setSpriteByStage();
+          tile.tileData.plant = plant;
+          this.plants.push(plant);
+        }
       }
     }
     // Căn giữa map trên màn hình

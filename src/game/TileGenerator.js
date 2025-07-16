@@ -1,3 +1,5 @@
+import { STATIC_MAP } from './staticMap';
+
 export class TileGenerator {
   constructor() {
     this.tileTypes = {
@@ -15,14 +17,15 @@ export class TileGenerator {
   }
 
   getTileType(x, y) {
-    // Chỉ tạo hai loại nền: Wheatfield (dirt) ở trung tâm, water ở ngoài rìa
-    const centerX = 31;
-    const centerY = 31;
-    const distanceFromCenter = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-    if (distanceFromCenter < 25) {
-      return this.tileTypes.dirt; // Wheatfield
+    // Lấy loại tile từ STATIC_MAP
+    const row = STATIC_MAP[y % STATIC_MAP.length];
+    const char = row[x % row.length];
+    if (char === 'R') {
+      return { ...this.tileTypes.water, hasTree: false };
+    } else if (char === 'F') {
+      return { ...this.tileTypes.dirt, hasTree: true };
     } else {
-      return this.tileTypes.water; // 1WaterCell
+      return { ...this.tileTypes.dirt, hasTree: false };
     }
   }
 
