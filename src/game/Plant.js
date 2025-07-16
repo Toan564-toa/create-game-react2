@@ -25,12 +25,37 @@ export class Plant {
     this.growthTween = null;
 
     this.age = 0; // số ngày tuổi
-    this.stage = 'seedling'; // 'seedling', 'mature', 'dead'
-    this.status = 'normal'; // 'normal', 'broken', 'burned'
+    this.stage = 'seedling'; // 'seedling', 'young', 'mature', 'dead'
+    this.status = 'normal'; // 'normal', 'broken', 'burned', 'deadtree', 'treeroot'
+    this.type = type || 'sapling';
+    this.setSpriteByStage();
+  }
+
+  setSpriteByStage() {
+    // Xóa sprite cũ nếu có
+    if (this.sprite) this.sprite.destroy();
+    let key = '';
+    switch (this.stage) {
+      case 'seedling':
+        key = 'Sapling'; break;
+      case 'young':
+        key = 'GrowingTree'; break;
+      case 'mature':
+        key = 'Trees'; break;
+      case 'dead':
+        if (this.status === 'deadtree') key = 'DeadTree';
+        else if (this.status === 'treeroot') key = 'TreeRoot';
+        break;
+    }
+    if (key) {
+      this.sprite = this.scene.add.image(this.x, this.y, key);
+      this.sprite.setDisplaySize(16, 16);
+      this.sprite.setDepth(1);
+    }
   }
 
   grow(environment) {
-    if (this.harvested) return 0;
+    if (this.harvested || this.stage === 'dead') return 0;
     
     // Calculate growth factor based on environment
     const tempFactor = this.getTemperatureFactor(environment.temperature);
@@ -58,25 +83,19 @@ export class Plant {
     
     this.age += 1;
     if (this.age > 5 && this.stage === 'seedling') {
+      this.stage = 'young';
+      this.setSpriteByStage();
+    }
+    if (this.age > 10 && this.stage === 'young') {
       this.stage = 'mature';
+      this.setSpriteByStage();
     }
     
     return carbonAbsorbed;
   }
 
   updateGrowthStage() {
-    const growthPercentage = this.currentGrowth / this.maxGrowthTime;
-    
-    if (growthPercentage >= 1.0 && this.growthStage < 3) {
-      this.growthStage = 3; // Mature
-      this.updateSprite();
-    } else if (growthPercentage >= 0.6 && this.growthStage < 2) {
-      this.growthStage = 2; // Young
-      this.updateSprite();
-    } else if (growthPercentage >= 0.2 && this.growthStage < 1) {
-      this.growthStage = 1; // Sprout
-      this.updateSprite();
-    }
+    // Đã chuyển sang dùng age và stage, không cần logic này nữa
   }
 
   updateSprite() {
@@ -189,11 +208,10 @@ export class Plant {
 
   applyDisaster(disasterType) {
     if (this.stage === 'dead') return;
-    if (disasterType === 'storm') {
-      this.status = 'broken';
-    } else if (disasterType === 'heatwave') {
-      this.status = 'burned';
-    }
+    // Khi bị thiên tai, chuyển thành DeadTree
+    this.stage = 'dead';
+    this.status = 'deadtree';
+    this.setSpriteByStage();
   }
 
   chopDown() {
@@ -201,6 +219,15 @@ export class Plant {
       this.stage = 'dead';
       this.status = 'normal';
     }
+  }
+
+  setTreeRoot() {
+    this.status = 'treeroot';
+    this.setSpriteByStage();
+  }
+
+  destroy() {
+    if (this.sprite) this.sprite.destroy();
   }
 }
 

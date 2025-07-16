@@ -2,22 +2,12 @@ export class TileGenerator {
   constructor() {
     this.tileTypes = {
       dirt: {
-        type: 'dirt',
-        color: 0x8B4513,
+        type: 'dirt', // Wheatfield
+        color: 0xE2C275, // màu vàng nhạt giống lúa mì
         plantable: true
       },
-      grass: {
-        type: 'grass',
-        color: 0x228B22,
-        plantable: false
-      },
-      stone: {
-        type: 'stone',
-        color: 0x696969,
-        plantable: false
-      },
       water: {
-        type: 'water',
+        type: 'water', // 1WaterCell
         color: 0x4169E1,
         plantable: false
       }
@@ -25,45 +15,14 @@ export class TileGenerator {
   }
 
   getTileType(x, y) {
-    // Create a simple pattern for the map
-    // Center area is mostly dirt for planting
-    // Edges have grass and stone
-    // Some water patches
-    
+    // Chỉ tạo hai loại nền: Wheatfield (dirt) ở trung tâm, water ở ngoài rìa
     const centerX = 31;
     const centerY = 31;
     const distanceFromCenter = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-    
-    // Use noise-like function for natural looking patterns
-    const noise = this.simpleNoise(x, y);
-    
-    if (distanceFromCenter < 15) {
-      // Center area - mostly dirt
-      if (noise > 0.8) {
-        return this.tileTypes.grass;
-      } else if (noise > 0.6) {
-        return this.tileTypes.stone;
-      } else {
-        return this.tileTypes.dirt;
-      }
-    } else if (distanceFromCenter < 25) {
-      // Middle area - mix of grass and dirt
-      if (noise > 0.7) {
-        return this.tileTypes.grass;
-      } else if (noise > 0.4) {
-        return this.tileTypes.dirt;
-      } else {
-        return this.tileTypes.stone;
-      }
+    if (distanceFromCenter < 25) {
+      return this.tileTypes.dirt; // Wheatfield
     } else {
-      // Outer area - mostly grass and stone
-      if (noise > 0.6) {
-        return this.tileTypes.grass;
-      } else if (noise > 0.3) {
-        return this.tileTypes.stone;
-      } else {
-        return this.tileTypes.dirt;
-      }
+      return this.tileTypes.water; // 1WaterCell
     }
   }
 

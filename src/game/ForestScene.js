@@ -48,6 +48,17 @@ export class ForestScene extends Phaser.Scene {
     this.currentTool = tool;
   }
 
+  preload() {
+    this.load.image('Sapling', 'assetGame/Sapling.png');
+    this.load.image('GrowingTree', 'assetGame/GrowingTree.png');
+    this.load.image('Trees', 'assetGame/Trees.png');
+    this.load.image('DeadTree', 'assetGame/DeadTree.png');
+    this.load.image('TreeRoot', 'assetGame/TreeRoot.png');
+    this.load.image('Rock', 'assetGame/Rock.png');
+    this.load.image('Wheatfield', 'assetGame/Wheatfield.png');
+    this.load.image('1WaterCell', 'assetGame/1WaterCell.png');
+  }
+
   create() {
     // Tính toán tileSize để map vừa với chiều cao màn hình
     const mapTiles = 62;
@@ -70,7 +81,10 @@ export class ForestScene extends Phaser.Scene {
         const tileX = x * tileSize;
         const tileY = y * tileSize;
         const tileType = this.tileGenerator.getTileType(x, y);
-        const tile = this.add.rectangle(tileX + tileSize/2, tileY + tileSize/2, tileSize, tileSize, tileType.color);
+        let tileSpriteKey = tileType.type === 'dirt' ? 'Wheatfield' : '1WaterCell';
+        const tile = this.add.image(tileX + tileSize/2, tileY + tileSize/2, tileSpriteKey);
+        tile.setDisplaySize(tileSize, tileSize);
+        tile.setDepth(0);
         tile.tileData = {
           x: x,
           y: y,
@@ -88,7 +102,7 @@ export class ForestScene extends Phaser.Scene {
     const offsetX = (this.sys.game.config.width - mapWidth) / 2;
     const offsetY = (this.sys.game.config.height - mapHeight) / 2;
     this.children.list.forEach(obj => {
-      if (obj instanceof Phaser.GameObjects.Rectangle) {
+      if (obj instanceof Phaser.GameObjects.Image) {
         obj.x += offsetX;
         obj.y += offsetY;
       }
@@ -136,6 +150,18 @@ export class ForestScene extends Phaser.Scene {
     const tileY = Math.floor((mouseY - offsetY) / tileSize);
     if (tileX >= 0 && tileX < mapTiles && tileY >= 0 && tileY < mapTiles) {
       const tile = this.tiles[tileX][tileY];
+      // Nếu là DeadTree hoặc TreeRoot thì chặt luôn
+      if (tile.tileData.plant && tile.tileData.plant.stage === 'dead') {
+        // Nếu là DeadTree, chuyển thành TreeRoot
+        if (tile.tileData.plant.status === 'deadtree') {
+          tile.tileData.plant.setTreeRoot();
+        } else if (tile.tileData.plant.status === 'treeroot') {
+          // Nếu là TreeRoot, chặt lần nữa thì xóa
+          tile.tileData.plant.destroy();
+          tile.tileData.plant = null;
+        }
+        return;
+      }
       switch (this.currentTool) {
         case 'plant':
           this.plantSeed(tileX, tileY);
@@ -152,13 +178,11 @@ export class ForestScene extends Phaser.Scene {
 
   plantSeed(tileX, tileY) {
     const tile = this.tiles[tileX][tileY];
-    
+    // Chỉ cho phép trồng trên Wheatfield (dirt) trống
     if (tile.tileData.type === 'dirt' && !tile.tileData.plant && this.gameData.energyOrbs >= 10) {
-      const plant = new Plant(this, tileX * 16 + 8, tileY * 16 + 8);
+      const plant = new Plant(this, tileX * this.tileSize + this.tileSize/2, tileY * this.tileSize + this.tileSize/2, 'sapling');
       tile.tileData.plant = plant;
       this.plants.push(plant);
-      
-      // Update game data
       this.updateGameData({
         energyOrbs: this.gameData.energyOrbs - 10
       });
