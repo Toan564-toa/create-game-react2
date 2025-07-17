@@ -55,15 +55,14 @@ export class ForestScene extends Phaser.Scene {
     this.load.image('DeadTree', 'assetGame/DeadTree.png');
     this.load.image('TreeRoot', 'assetGame/TreeRoot.png');
     this.load.image('Rock', 'assetGame/Rock.png');
-    this.load.image('Wheatfield', 'assetGame/Wheatfield.png');
+    this.load.image('Wheatfield', 'assetGame/Wheatfield.jpg');
     this.load.image('1WaterCell', 'assetGame/1WaterCell.png');
   }
 
   create() {
-    // Tính toán tileSize để map vừa với chiều cao màn hình
+    // Luôn dùng tileSize = 16 để khớp asset
     const mapTiles = 62;
-    const screenHeight = this.sys.game.config.height;
-    const tileSize = Math.floor(screenHeight / mapTiles);
+    const tileSize = 16;
     this.tileSize = tileSize;
     this.createTileMap();
     this.setupInput();
@@ -72,9 +71,9 @@ export class ForestScene extends Phaser.Scene {
   }
 
   createTileMap() {
-    // Generate 62x62 tile grid với tileSize động
+    // Generate 62x62 tile grid với tileSize cố định 16
     const mapTiles = 62;
-    const tileSize = this.tileSize || 16;
+    const tileSize = 16;
     for (let x = 0; x < mapTiles; x++) {
       this.tiles[x] = [];
       for (let y = 0; y < mapTiles; y++) {
@@ -83,7 +82,7 @@ export class ForestScene extends Phaser.Scene {
         const tileType = this.tileGenerator.getTileType(x, y);
         let tileSpriteKey = tileType.type === 'dirt' ? 'Wheatfield' : '1WaterCell';
         const tile = this.add.image(tileX + tileSize/2, tileY + tileSize/2, tileSpriteKey);
-        tile.setDisplaySize(tileSize, tileSize);
+        tile.setDisplaySize(16, 16);
         tile.setDepth(0);
         tile.tileData = {
           x: x,
