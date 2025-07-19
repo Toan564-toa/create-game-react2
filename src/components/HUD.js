@@ -114,15 +114,15 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
         <div className="tool-panel">
           <div className={`tool-item${tool === 'plant' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('plant')}>
             <div className="tool-icon">🌱</div>
-            <div className="tool-label">Cây (1)</div>
+            <div className="tool-label">Trồng cây (1)</div>
           </div>
           <div className={`tool-item${tool === 'water' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('water')}>
             <div className="tool-icon">💧</div>
-            <div className="tool-label">Nước (2)</div>
+            <div className="tool-label">Tưới nước (2)</div>
           </div>
           <div className={`tool-item${tool === 'fertilize' ? ' active' : ''}`} onClick={() => onToolChange && onToolChange('fertilize')}>
             <div className="tool-icon">🌿</div>
-            <div className="tool-label">Phân bón (3)</div>
+            <div className="tool-label">Bón phân (3)</div>
           </div>
         </div>
         

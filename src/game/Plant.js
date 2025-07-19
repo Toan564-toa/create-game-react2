@@ -3,7 +3,7 @@ export class Plant {
     this.scene = scene;
     this.x = x;
     this.y = y;
-    this.type = type;
+    this.type = type || 'sapling';
     
     // Plant properties
     this.maxGrowthTime = 60; // seconds
@@ -17,17 +17,14 @@ export class Plant {
     this.fertilized = false;
     this.health = 100;
     
-    // Create plant sprite
-    this.sprite = scene.add.rectangle(x, y, 8, 8, 0x8B4513); // Brown seed
-    this.sprite.setStrokeStyle(1, 0x000000);
-    
     // Growth animation
     this.growthTween = null;
 
     this.age = 0; // số ngày tuổi
     this.stage = 'seedling'; // 'seedling', 'young', 'mature', 'dead'
     this.status = 'normal'; // 'normal', 'broken', 'burned', 'deadtree', 'treeroot'
-    this.type = type || 'sapling';
+    // Không tạo rectangle sprite nữa
+    this.sprite = null;
     this.setSpriteByStage();
   }
 
@@ -99,38 +96,19 @@ export class Plant {
   }
 
   updateSprite() {
-    // Update sprite appearance based on growth stage
-    switch (this.growthStage) {
-      case 0: // Seed
-        this.sprite.setFillStyle(0x8B4513);
-        this.sprite.setSize(8, 8);
-        break;
-      case 1: // Sprout
-        this.sprite.setFillStyle(0x90EE90);
-        this.sprite.setSize(10, 10);
-        break;
-      case 2: // Young
-        this.sprite.setFillStyle(0x32CD32);
-        this.sprite.setSize(12, 12);
-        break;
-      case 3: // Mature
-        this.sprite.setFillStyle(0x228B22);
-        this.sprite.setSize(14, 14);
-        break;
-    }
+    // Không còn dùng rectangle nên bỏ các hiệu ứng fillStyle
   }
 
   water() {
     this.watered = true;
     this.health = Math.min(100, this.health + 20);
-    
-    // Visual feedback
-    const originalColor = this.sprite.fillColor;
-    this.sprite.setFillStyle(0x4169E1);
-    this.scene.time.delayedCall(500, () => {
-      this.sprite.setFillStyle(originalColor);
-    });
-
+    // Có thể thêm hiệu ứng tint nếu muốn
+    if (this.sprite && this.sprite.setTint) {
+      this.sprite.setTint(0x4169E1);
+      this.scene.time.delayedCall(500, () => {
+        this.sprite.clearTint();
+      });
+    }
     if (this.status === 'burned') {
       this.status = 'normal';
     }
@@ -139,23 +117,26 @@ export class Plant {
   fertilize() {
     this.fertilized = true;
     this.health = Math.min(100, this.health + 30);
-    
-    // Visual feedback
-    const originalColor = this.sprite.fillColor;
-    this.sprite.setFillStyle(0xFFD700);
-    this.scene.time.delayedCall(500, () => {
-      this.sprite.setFillStyle(originalColor);
-    });
+    if (this.sprite && this.sprite.setTint) {
+      this.sprite.setTint(0xFFD700);
+      this.scene.time.delayedCall(500, () => {
+        this.sprite.clearTint();
+      });
+    }
   }
 
   harvest() {
     this.harvested = true;
-    
-    // Visual feedback
-    this.sprite.setFillStyle(0xFFD700);
-    this.scene.time.delayedCall(1000, () => {
-      this.sprite.destroy();
-    });
+    if (this.sprite && this.sprite.setTint) {
+      this.sprite.setTint(0xFFD700);
+      this.scene.time.delayedCall(1000, () => {
+        this.sprite.destroy();
+      });
+    } else if (this.sprite) {
+      this.scene.time.delayedCall(1000, () => {
+        this.sprite.destroy();
+      });
+    }
   }
 
   isMature() {
@@ -208,10 +189,13 @@ export class Plant {
 
   applyDisaster(disasterType) {
     if (this.stage === 'dead') return;
-    // Khi bị thiên tai, chuyển thành DeadTree
-    this.stage = 'dead';
-    this.status = 'deadtree';
-    this.setSpriteByStage();
+    // Chỉ cây trưởng thành loại 'trees' mới bị thiên tai biến thành DeadTree
+    if (this.type === 'trees' && this.stage === 'mature') {
+      this.stage = 'dead';
+      this.status = 'deadtree';
+      this.setSpriteByStage();
+    }
+    // Các loại cây khác không bị ảnh hưởng bởi thiên tai
   }
 
   chopDown() {
@@ -222,8 +206,12 @@ export class Plant {
   }
 
   setTreeRoot() {
-    this.status = 'treeroot';
-    this.setSpriteByStage();
+    // Chỉ cho phép chuyển nếu đang là DeadTree
+    if (this.stage === 'dead' && this.status === 'deadtree') {
+      this.status = 'treeroot';
+      // stage vẫn là 'dead'
+      this.setSpriteByStage();
+    }
   }
 
   destroy() {

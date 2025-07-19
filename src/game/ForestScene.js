@@ -90,11 +90,19 @@ export class ForestScene extends Phaser.Scene {
           type: tileType.type,
           plant: null,
           watered: false,
-          fertilized: false
+          fertilized: false,
+          isRock: tileType.isRock || false
         };
         this.tiles[x][y] = tile;
+        // Nếu là Rock thì thêm sprite Rock
+        if (tileType.isRock) {
+          const rock = this.add.image(tileX + tileSize/2, tileY + tileSize/2, 'Rock');
+          rock.setDisplaySize(16, 16);
+          rock.setDepth(1);
+          tile.tileData.rock = rock;
+        }
         // Nếu là Forest (hasTree) thì tạo cây trưởng thành (Trees)
-        if (tileType.type === 'dirt' && tileType.hasTree) {
+        if (tileType.type === 'dirt' && tileType.hasTree && !tileType.isRock) {
           const plant = new Plant(this, tileX + tileSize/2, tileY + tileSize/2, 'trees');
           plant.stage = 'mature';
           plant.setSpriteByStage();
@@ -185,9 +193,10 @@ export class ForestScene extends Phaser.Scene {
 
   plantSeed(tileX, tileY) {
     const tile = this.tiles[tileX][tileY];
-    // Chỉ cho phép trồng trên Wheatfield (dirt) trống
-    if (tile.tileData.type === 'dirt' && !tile.tileData.plant && this.gameData.energyOrbs >= 10) {
+    // Chỉ cho phép trồng trên Wheatfield (dirt) trống, không phải Rock, không có plant
+    if (tile.tileData.type === 'dirt' && !tile.tileData.plant && this.gameData.energyOrbs >= 10 && tile.texture.key === 'Wheatfield' && !tile.tileData.isRock) {
       const plant = new Plant(this, tileX * this.tileSize + this.tileSize/2, tileY * this.tileSize + this.tileSize/2, 'sapling');
+      plant.harvested = false;
       tile.tileData.plant = plant;
       this.plants.push(plant);
       this.updateGameData({
@@ -282,9 +291,10 @@ export class ForestScene extends Phaser.Scene {
 
   handleNewDay() {
     const currentDay = TimeManager.getCurrentDay();
-    // Cập nhật tuổi và trạng thái cây
+    // Reset watered/fertilized mỗi ngày
     this.plants.forEach(plant => {
-      plant.grow(this.environment);
+      plant.watered = false;
+      plant.fertilized = false;
     });
     // Sinh thiên tai ngẫu nhiên
     const event = RandomEventManager.getRandomEvent(currentDay);
@@ -301,6 +311,8 @@ export class ForestScene extends Phaser.Scene {
           affectedPlants.splice(idx, 1);
         }
       }
+      // Hiển thị thông báo thiên tai
+      this.showDisasterNotification(event);
     }
     // Gửi thông báo ngày mới và sự kiện lên HUD
     window.dispatchEvent(new CustomEvent('dayEvent', {
@@ -328,6 +340,21 @@ export class ForestScene extends Phaser.Scene {
     // Update plants
     this.plants.forEach(plant => {
       plant.update(delta);
+    });
+  }
+
+  showDisasterNotification(event) {
+    // Hiển thị thông báo thiên tai lên màn hình trong 2s
+    const text = this.add.text(this.sys.game.config.width/2, 40, `Thiên tai xảy ra: ${event}`, {
+      font: '20px Arial',
+      fill: '#ff3333',
+      backgroundColor: '#fff',
+      padding: { x: 10, y: 5 },
+      align: 'center'
+    }).setOrigin(0.5);
+    text.setDepth(100);
+    this.time.delayedCall(2000, () => {
+      text.destroy();
     });
   }
 } 

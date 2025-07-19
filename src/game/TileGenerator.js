@@ -20,11 +20,16 @@ export class TileGenerator {
     // Lấy loại tile từ STATIC_MAP
     const row = STATIC_MAP[y % STATIC_MAP.length];
     const char = row[x % row.length];
+    // Thêm Rock ngẫu nhiên trên dirt (Wheatfield) không phải Forest
     if (char === 'R') {
       return { ...this.tileTypes.water, hasTree: false };
     } else if (char === 'F') {
       return { ...this.tileTypes.dirt, hasTree: true };
     } else {
+      // 10% cơ hội là Rock trên Wheatfield thường
+      if (this.simpleNoise(x, y) > 0.9) {
+        return { ...this.tileTypes.dirt, hasTree: false, isRock: true };
+      }
       return { ...this.tileTypes.dirt, hasTree: false };
     }
   }
