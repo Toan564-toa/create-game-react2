@@ -78,7 +78,7 @@ export class Plant {
     // Calculate carbon absorbed
     const carbonAbsorbed = this.carbonRate * growthIncrement;
     
-    this.age += 1;
+    this.age += 0.2;
     if (this.age > 5 && this.stage === 'seedling') {
       this.stage = 'young';
       this.setSpriteByStage();

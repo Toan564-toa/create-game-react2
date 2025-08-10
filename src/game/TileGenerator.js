@@ -27,7 +27,7 @@ export class TileGenerator {
       return { ...this.tileTypes.dirt, hasTree: true };
     } else {
       // 10% cơ hội là Rock trên Wheatfield thường
-      if (this.simpleNoise(x, y) > 0.9) {
+      if (this.simpleNoise(x, y) > 0.99) {
         return { ...this.tileTypes.dirt, hasTree: false, isRock: true };
       }
       return { ...this.tileTypes.dirt, hasTree: false };

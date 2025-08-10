@@ -30,7 +30,12 @@ export class GameState {
             currentArea: state.currentArea || 'Forest Valley',
             co2Absorbed: state.co2Absorbed || 0,
             co2Target: state.co2Target || 1000,
-            areaHealth: state.areaHealth || 100
+            areaHealth: state.areaHealth || 100,
+            // Thêm các trường mới
+            carbonCreditsHistory: state.carbonCreditsHistory || [],
+            totalInvestment: state.totalInvestment || 0,
+            carbonPriceHistory: state.carbonPriceHistory || [],
+            lastCalculationTime: state.lastCalculationTime || Date.now()
           };
         }
       }
@@ -45,7 +50,12 @@ export class GameState {
       currentArea: 'Forest Valley',
       co2Absorbed: 0,
       co2Target: 1000,
-      areaHealth: 100
+      areaHealth: 100,
+      // Thêm các trường mới
+      carbonCreditsHistory: [],
+      totalInvestment: 0,
+      carbonPriceHistory: [],
+      lastCalculationTime: Date.now()
     };
   }
 

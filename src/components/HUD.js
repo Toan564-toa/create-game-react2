@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './HUD.css';
 
-const HUD = ({ gameData, onPause, tool, onToolChange }) => {
+const HUD = ({ gameData, onPause, tool, onToolChange, treeStats = { total: 0, alive: 0, mature: 0 } }) => {
+  // Debug: Kiểm tra props
+  console.log('HUD Props:', { gameData, onPause, tool, onToolChange, treeStats });
   const [environmentData, setEnvironmentData] = useState({
     temperature: 22,
     humidity: 65,
@@ -132,10 +134,11 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
       <div className="d-flex justify-between items-start">
         <div>
           <div className="hud-section">
-            <div className="hud-label">🗓️ Ngày</div>
+            <div className="hud-label">🗓️ Năm</div>
             <div className="hud-value">{currentDay}</div>
+            
           </div>
-
+            
           <div className="hud-section">
             <div className="hud-label">🌳 Sức khỏe khu vực</div>
             <div className="health-bar">
@@ -156,10 +159,28 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
             <div className="hud-label">💎 Năng lượng</div>
             <div className="hud-value">{gameData.energyOrbs}</div>
           </div>
+          
+          <div className="hud-section">
+            <div className="hud-label">🌳 Tổng số cây sống</div>
+            <div className="hud-value">
+              {treeStats.alive || 0}
+              <div className="tree-details">
+                <small>Trưởng thành: {treeStats.mature || 0}</small>
+              </div>
+            </div>
+          </div>
+
 
           <div className="hud-section">
-            <div className="hud-label">🌲 Tín dụng Carbon</div>
-            <div className="hud-value">{gameData.carbonCredits}</div>
+            <div className="hud-label">🌲 Tín chỉ Carbon</div>
+            <div className="hud-value">
+              {gameData.carbonCredits.toFixed(2)}
+              {/* <div className="carbon-credit-details">
+                <small>Giá: ${(gameData.carbonCredits * 50).toFixed(2)}</small>
+                <small>ROI: {gameData.totalInvestment > 0 ? 
+                  (((gameData.carbonCredits * 50 - gameData.totalInvestment) / gameData.totalInvestment) * 100).toFixed(1) : 0}%</small>
+              </div> */}
+            </div>
           </div>
 
           {disasterEvent && (
@@ -173,7 +194,7 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
           )}
         </div>
 
-        <div className="hud-section">
+        <div className="hud-section env-section">
           <div className="env-title">Environment</div>
           <div className="env-stats">
             <div className="env-stat">
@@ -206,10 +227,17 @@ const HUD = ({ gameData, onPause, tool, onToolChange }) => {
 
       <div className="hud-bottom">
         <div className="tool-panel">
-          <div className={`tool-item${tool === 'plant' ? ' active' : ''}`} onClick={() => onToolChange?.('plant')}>
+          <div 
+            className={`tool-item${tool === 'plant' ? ' active' : ''}`} 
+            onClick={() => {
+              console.log('HUD: Clicked plant tool');  // ✅ LOG 1
+              onToolChange?.('plant');
+            }}
+          >
             <div className="tool-icon">🌱</div>
             <div className="tool-label">Trồng cây (1)</div>
           </div>
+
           <div className={`tool-item${tool === 'water' ? ' active' : ''}`} onClick={() => onToolChange?.('water')}>
             <div className="tool-icon">💧</div>
             <div className="tool-label">Tưới nước (2)</div>

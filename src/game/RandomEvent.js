@@ -2,7 +2,7 @@
 class RandomEventManager {
   constructor() {
     this.lastEventDay = 0;
-    this.cooldown = 3; // số ngày tối thiểu giữa 2 thiên tai
+    this.cooldown = 5; // số ngày tối thiểu giữa 2 thiên tai
     this.activeEvent = null; // current disaster event
     this.environmentImpact = {
       temperature: 0,
@@ -26,7 +26,7 @@ class RandomEventManager {
     const adjustedProbability = baseProbability + (1 - treeHealthRatio) * 0.2;
 
     if (Math.random() < adjustedProbability) {
-      const events = ['Hạn hán', 'Bão Lớn', 'Sâu Bệnh'];
+      const events = ['Hạn Hán', 'Bão Lớn', 'Sâu Bệnh'];
       const event = events[Math.floor(Math.random() * events.length)];
 
       this.lastEventDay = currentDay;
@@ -67,7 +67,7 @@ class RandomEventManager {
           airQuality: -1.5
         };
         break;
-      case 'Lũ lụt': // Flood
+      case 'Bão Lớn': // Flood
         this.environmentImpact = {
           temperature: -1,
           humidity: -2,
